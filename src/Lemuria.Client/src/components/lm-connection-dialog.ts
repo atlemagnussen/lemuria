@@ -18,6 +18,8 @@ const blank = (): ConnectionInput => ({
   trustServerCertificate: false,
 });
 
+const defaultPorts: Record<string, string> = { sqlserver: '1433', postgres: '5432' };
+
 /** Create / edit a connection. Open with `edit(connection | null)`. */
 export class LmConnectionDialog extends LitElement {
   static properties = {
@@ -94,13 +96,19 @@ export class LmConnectionDialog extends LitElement {
       <wa-dialog label=${isEdit ? `Edit connection` : 'New connection'} ?open=${this.open} @wa-after-hide=${this.onHide} style="--width: 34rem">
         <form id="form" @submit=${this.save} @input=${() => (this.test = { kind: 'idle' })}>
           <wa-input class="full" label="Name" required .value=${f.name} @input=${this.bind('name')} autofocus></wa-input>
-          <wa-select class="full" label="Type" .value=${f.provider} @change=${this.bind('provider')}>
+          <wa-select class="full" label="Type" .value=${f.provider} @change=${this.setProvider}>
             <wa-option value="sqlserver">SQL Server</wa-option>
-            <wa-option value="postgres" disabled>PostgreSQL (coming)</wa-option>
+            <wa-option value="postgres">PostgreSQL</wa-option>
           </wa-select>
           <wa-input label="Host" required .value=${f.host} @input=${this.bind('host')}></wa-input>
-          <wa-input label="Port" type="number" placeholder="1433" .value=${f.port?.toString() ?? ''} @input=${this.bindPort}></wa-input>
-          <wa-input class="full" label="Default database" placeholder="(server default)" .value=${f.database ?? ''} @input=${this.bind('database')}></wa-input>
+          <wa-input label="Port" type="number" placeholder=${defaultPorts[f.provider] ?? ''} .value=${f.port?.toString() ?? ''} @input=${this.bindPort}></wa-input>
+          <wa-input
+            class="full"
+            label="Default database"
+            placeholder=${f.provider === 'postgres' ? 'postgres' : '(server default)'}
+            .value=${f.database ?? ''}
+            @input=${this.bind('database')}
+          ></wa-input>
           <wa-input label="Username" required autocomplete="off" .value=${f.username ?? ''} @input=${this.bind('username')}></wa-input>
           <div></div>
           <wa-input
@@ -146,7 +154,17 @@ export class LmConnectionDialog extends LitElement {
     this.form = { ...this.form, [key]: key === 'database' && !value ? null : value };
   };
 
-  private bindCheck = (key: 'encrypt' | 'trustServerCertificate') => (e: Event) => {
+  private setProvider = (e: Event) => {
+    const provider = (e.target as HTMLSelectElement).value;
+    if (provider === this.form.provider) return;
+    // Local Postgres servers often have no TLS, so a new Postgres connection starts with Encrypt off
+    // (TLS is still used when the server offers it). Edits keep whatever the user chose.
+    const encrypt = this.existing ? this.form.encrypt : provider === 'sqlserver';
+    this.form = { ...this.form, provider, encrypt };
+    this.test = { kind: 'idle' };
+  };
+
+  private bindCheck =(key: 'encrypt' | 'trustServerCertificate') => (e: Event) => {
     this.form = { ...this.form, [key]: (e.target as HTMLInputElement).checked };
   };
 

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
@@ -73,7 +74,7 @@ public sealed class QueryService(ConnectionStore store, ProviderRegistry provide
                 do
                 {
                     if (reader.FieldCount == 0) continue;
-                    resultSets.Add(await ReadResultSetAsync(reader, maxRows, ct));
+                    resultSets.Add(await ReadResultSetAsync(provider, reader, maxRows, ct));
                 } while (await reader.NextResultAsync(ct));
 
                 if (reader.RecordsAffected > 0) recordsAffected += reader.RecordsAffected;
@@ -87,7 +88,7 @@ public sealed class QueryService(ConnectionStore store, ProviderRegistry provide
         return new QueryResponse(resultSets, messages, recordsAffected, sw.ElapsedMilliseconds, null);
     }
 
-    private static async Task<ResultSet> ReadResultSetAsync(DbDataReader reader, int maxRows, CancellationToken ct)
+    private static async Task<ResultSet> ReadResultSetAsync(IDbProvider provider, DbDataReader reader, int maxRows, CancellationToken ct)
     {
         var columns = new ColumnInfo[reader.FieldCount];
         for (var i = 0; i < columns.Length; i++)
@@ -103,10 +104,23 @@ public sealed class QueryService(ConnectionStore store, ProviderRegistry provide
                 break;
             }
             var row = new object?[columns.Length];
-            for (var i = 0; i < row.Length; i++) row[i] = ToJsonValue(reader.GetValue(i));
+            for (var i = 0; i < row.Length; i++) row[i] = ReadCell(provider, reader, i);
             rows.Add(row);
         }
         return new ResultSet(columns, rows, truncated);
+    }
+
+    /// <summary>Read one cell; a value that can't be converted shows as a warning instead of failing the query.</summary>
+    private static object? ReadCell(IDbProvider provider, DbDataReader reader, int i)
+    {
+        try
+        {
+            return reader.IsDBNull(i) ? null : ToJsonValue(provider.ReadValue(reader, i));
+        }
+        catch (Exception ex) when (ex is InvalidCastException or OverflowException or NotSupportedException)
+        {
+            return $"⚠ {ex.Message}";
+        }
     }
 
     /// <summary>Normalize ADO.NET values to something JSON/JS can represent without losing information.</summary>
@@ -116,13 +130,27 @@ public sealed class QueryService(ConnectionStore store, ProviderRegistry provide
         bool or byte or short or int or float or double or string => value,
         long l => l is > MaxSafeJsInteger or < -MaxSafeJsInteger ? l.ToString(CultureInfo.InvariantCulture) : l,
         decimal d => d.ToString(CultureInfo.InvariantCulture),
+        DateTime { Kind: DateTimeKind.Utc } dt => dt.ToString("yyyy-MM-dd HH:mm:ss.FFFFFFF", CultureInfo.InvariantCulture) + " +00:00",
         DateTime dt => dt.ToString("yyyy-MM-dd HH:mm:ss.FFFFFFF", CultureInfo.InvariantCulture),
         DateTimeOffset dto => dto.ToString("yyyy-MM-dd HH:mm:ss.FFFFFFF zzz", CultureInfo.InvariantCulture),
         DateOnly d => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+        TimeOnly t => t.ToString("HH:mm:ss.FFFFFFF", CultureInfo.InvariantCulture),
         TimeSpan ts => ts.ToString("c", CultureInfo.InvariantCulture),
         Guid g => g.ToString(),
         byte[] bytes => "0x" + Convert.ToHexString(bytes, 0, Math.Min(bytes.Length, MaxBinaryBytesShown))
                         + (bytes.Length > MaxBinaryBytesShown ? "…" : ""),
+        BitArray bits => string.Concat(bits.Cast<bool>().Select(b => b ? '1' : '0')),
+        Array array => FormatArray(array),
         _ => Convert.ToString(value, CultureInfo.InvariantCulture),
     };
+
+    /// <summary>Arrays (Postgres int[], text[], ...) in Postgres literal style: {1,2,NULL}.</summary>
+    private static string FormatArray(Array array) =>
+        "{" + string.Join(",", array.Cast<object?>().Select(v => v is null or DBNull ? "NULL" : ToJsonValue(v) switch
+        {
+            string s => s.Length == 0 || s.AsSpan().IndexOfAny("{},\" \\") >= 0 || s.Equals("NULL", StringComparison.OrdinalIgnoreCase)
+                ? "\"" + s.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\""
+                : s,
+            var other => Convert.ToString(other, CultureInfo.InvariantCulture),
+        })) + "}";
 }

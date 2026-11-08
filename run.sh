@@ -12,7 +12,11 @@ set -m
 pids=()
 
 cleanup() {
-  trap - INT TERM EXIT
+  # Ignore further signals while stopping: a second Ctrl+C (or a HUP from closing the
+  # terminal) must not abort us before the KILL fallback below, or dotnet watch leaks.
+  trap '' INT TERM HUP
+  trap - EXIT
+  set +e   # never bail out half-way (e.g. echo failing on a closed terminal)
   echo; echo "Stopping..."
   for pid in "${pids[@]}"; do kill -INT -- "-$pid" 2>/dev/null || true; done
   # dotnet watch stops the app on SIGINT but keeps waiting for file changes, so the
@@ -25,7 +29,7 @@ cleanup() {
   done
   for pid in "${pids[@]}"; do kill -KILL -- "-$pid" 2>/dev/null || true; done
 }
-trap cleanup INT TERM EXIT
+trap cleanup INT TERM HUP EXIT
 
 (cd src/Lemuria.Client && exec npm run dev </dev/null) & pids+=($!)
 (cd src/Lemuria.Server && exec dotnet watch --non-interactive </dev/null) & pids+=($!)

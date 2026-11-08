@@ -2,7 +2,7 @@
 
 This will be a tool for querying databases
 
-Will start with SQL Server
+Supports SQL Server and PostgreSQL
 
 The project is named **Lemuria**.
 
@@ -10,7 +10,7 @@ The project is named **Lemuria**.
 
 Follow a Classic left menu - main window to the right layout.
 
-- Define SQL Server connections (later support postgres so keep it general)
+- Define SQL Server and PostgreSQL connections
 - Authenticate with SQL user
 - Query with autocomplete
 - Display results in grid
@@ -53,6 +53,12 @@ docker run -d --name lm-mssql -e ACCEPT_EULA=Y -e 'MSSQL_SA_PASSWORD=Lemuria!Dev
 
 Connect with host `localhost`, port `14333`, user `sa`, and tick _Trust server certificate_.
 
+```bash
+docker run -d --name lm-postgres -e 'POSTGRES_PASSWORD=Lemuria!Dev123' -p 54329:5432 postgres:17
+```
+
+Connect with type _PostgreSQL_, host `localhost`, port `54329`, user `postgres` (leave _Encrypt_ off — the image has no TLS).
+
 ## Architecture
 
 ```
@@ -60,7 +66,7 @@ src/
   Lemuria.Server/          ASP.NET Core (.NET 10)
     Api/Endpoints.cs         Minimal API: /api/connections, /databases, /schema, /query
     Connections/             Profiles stored as JSON in %LOCALAPPDATA%/Lemuria (password encrypted via Data Protection)
-    Providers/               IDbProvider: everything engine-specific (SQL Server today, Postgres next)
+    Providers/               IDbProvider: everything engine-specific (SQL Server, PostgreSQL)
     Query/QueryService.cs    Generic ADO.NET execution: batches, multiple result sets, messages, row cap, cancellation
     Pages/Index.cshtml       Host page that loads the custom elements (Vite dev server or built manifest)
   Lemuria.Client/             Lit + Web Awesome custom elements, built by Vite into ../Lemuria.Server/wwwroot/app
@@ -72,11 +78,11 @@ src/
     components/lm-data-grid  Custom virtualized grid (row recycling, sort, resize, range select, copy as TSV)
 ```
 
-### Adding Postgres
+### PostgreSQL notes
 
-1. `dotnet add package Npgsql`
-2. Implement `IDbProvider` (connection string, databases, schema query, `OnMessage` via `NoticeReceived`, error mapping). Batch splitting is a no-op.
-3. Register it in `Program.cs` and enable the option in `lm-connection-dialog`. The editor already maps `postgres` to the PostgreSQL dialect.
+- `PostgresProvider` splits scripts into statements itself (`PostgresScript`, psql rules: quotes, `$tag$` bodies, nested comments, `BEGIN ATOMIC`) and runs them one by one in autocommit, so `BEGIN`/`COMMIT` in the script work as in psql and an error reports the right line. Npgsql's own SQL rewriting is turned off in the csproj for that reason.
+- Encrypt off = TLS if the server offers it (`Prefer`); on = `VerifyFull`, or `Require` (no certificate check) with _Trust server certificate_.
+- No default database means `postgres`. Switching database in a query tab opens a new connection to it.
 
 ### Shortcuts
 

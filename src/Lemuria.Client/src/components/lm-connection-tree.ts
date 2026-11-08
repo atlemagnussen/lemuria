@@ -4,7 +4,18 @@ import { emit, store, StoreController } from '../store.js';
 
 type Load<T> = { state: 'loading' } | { state: 'ok'; value: T } | { state: 'error'; message: string };
 
-const quote = (name: string) => `[${name.replace(/]/g, ']]')}]`;
+/** Engine-specific identifier quoting and "first N rows" query used by the explorer. */
+const dialects: Record<string, { quote: (name: string) => string; selectTop: (fq: string, n: number) => string }> = {
+  sqlserver: {
+    quote: (name) => `[${name.replace(/]/g, ']]')}]`,
+    selectTop: (fq, n) => `SELECT TOP (${n}) *\nFROM ${fq};\n`,
+  },
+  postgres: {
+    quote: (name) => `"${name.replace(/"/g, '""')}"`,
+    selectTop: (fq, n) => `SELECT *\nFROM ${fq}\nLIMIT ${n};\n`,
+  },
+};
+const dialectOf = (c: Connection) => dialects[c.provider] ?? dialects.sqlserver;
 
 /**
  * Left-hand object explorer: connections → databases → tables/views → columns.
@@ -212,13 +223,14 @@ export class LmConnectionTree extends LitElement {
   private renderObject(c: Connection, db: string, schema: string, o: SchemaObject) {
     const key = `${c.id}|${db}|${schema}.${o.name}`;
     const open = this.expanded.has(key);
-    const fq = `${quote(schema)}.${quote(o.name)}`;
+    const d = dialectOf(c);
+    const sql = d.selectTop(`${d.quote(schema)}.${d.quote(o.name)}`, 1000);
     return html`
       <wa-tree-item ?lazy=${!open} @wa-lazy-load=${(e: Event) => this.onLazy(e, async () => this.expanded.add(key))}>
-        <div class="node" @dblclick=${(e: Event) => this.selectTop(e, c.id, db, fq)}>
+        <div class="node" @dblclick=${(e: Event) => this.selectTop(e, c.id, db, sql)}>
           <span class="text" title="${schema}.${o.name}">${schema}.${o.name}</span>
           <span class="actions">
-            <wa-button size="small" appearance="plain" title="Select top 1000" @click=${(e: Event) => this.selectTop(e, c.id, db, fq)}>
+            <wa-button size="small" appearance="plain" title="Select top 1000" @click=${(e: Event) => this.selectTop(e, c.id, db, sql)}>
               <wa-icon name="play" label="Select top 1000"></wa-icon>
             </wa-button>
           </span>
@@ -291,9 +303,9 @@ export class LmConnectionTree extends LitElement {
     emit(this, 'lm-open-query', { connectionId, database });
   }
 
-  private selectTop(e: Event, connectionId: string, database: string, fq: string) {
+  private selectTop(e: Event, connectionId: string, database: string, sql: string) {
     e.stopPropagation();
-    emit(this, 'lm-open-query', { connectionId, database, sql: `SELECT TOP (1000) *\nFROM ${fq};\n`, run: true });
+    emit(this, 'lm-open-query', { connectionId, database, sql, run: true });
   }
 
   private async deleteConnection(c: Connection) {

@@ -28,6 +28,9 @@ public interface IDbProvider
 
     /// <summary>Extract a friendly error (with line number when available) from a provider exception.</summary>
     QueryError? TryMapError(Exception ex, SqlBatch batch);
+
+    /// <summary>Read one non-null cell. Override for engine types that GetValue can't represent.</summary>
+    object ReadValue(DbDataReader reader, int ordinal) => reader.GetValue(ordinal);
 }
 
 public sealed record SqlBatch(string Sql, int StartLine);

@@ -8,7 +8,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
+    <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- PostgresProvider splits scripts into statements itself; stop Npgsql from re-splitting them on
+         semicolons (that breaks CREATE FUNCTION ... BEGIN ATOMIC bodies). No @named parameters are used. -->
+    <RuntimeHostConfigurationOption Include="Npgsql.EnableSqlRewriting" Value="false" />
   </ItemGroup>
 
   <PropertyGroup>

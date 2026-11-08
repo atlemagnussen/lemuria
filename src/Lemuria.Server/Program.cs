@@ -14,6 +14,7 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(paths.DataDirectory, "keys")));
 
 builder.Services.AddSingleton<IDbProvider, SqlServerProvider>();
+builder.Services.AddSingleton<IDbProvider, PostgresProvider>();
 builder.Services.AddSingleton<ProviderRegistry>();
 builder.Services.AddSingleton<ConnectionStore>();
 builder.Services.AddSingleton<QueryService>();
