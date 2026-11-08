@@ -1,0 +1,40 @@
+@page "/"
+@inject OpenQuery.Server.Vite.ViteAssets Vite
+@{
+    Layout = null;
+    var dev = Vite.DevServerUrl;
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open Query</title>
+    <link rel="icon" type="image/svg+xml" href="/app/favicon.svg" />
+    <script>
+        // Apply saved theme before first paint to avoid a flash.
+        (function () {
+            var t = localStorage.getItem('oq-theme');
+            var dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.classList.add(dark ? 'wa-dark' : 'wa-light');
+        })();
+    </script>
+    @if (dev is not null)
+    {
+        <script type="module" src="@(dev)/app/@("@")vite/client"></script>
+        <script type="module" src="@(dev)/app/src/main.ts"></script>
+    }
+    else
+    {
+        var m = Vite.GetManifest();
+        foreach (var css in m.Styles)
+        {
+            <link rel="stylesheet" href="@css" />
+        }
+        <script type="module" src="@m.Script"></script>
+    }
+</head>
+<body>
+    <oq-app></oq-app>
+</body>
+</html>

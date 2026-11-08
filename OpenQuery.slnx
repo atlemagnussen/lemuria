@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OpenQuery.Server/OpenQuery.Server.csproj" />
+  </Folder>
+</Solution>

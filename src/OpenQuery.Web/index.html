@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- Standalone dev entry (npm run dev → http://localhost:5173/app/). Production uses the Razor page. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Open Query (dev)</title>
+  <link rel="icon" type="image/svg+xml" href="/app/favicon.svg" />
+  <script>
+    (function () {
+      var t = localStorage.getItem('oq-theme');
+      var dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.add(dark ? 'wa-dark' : 'wa-light');
+    })();
+  </script>
+  <script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+  <oq-app></oq-app>
+</body>
+</html>

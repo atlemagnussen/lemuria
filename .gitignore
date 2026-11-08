@@ -1,0 +1,7 @@
+bin/
+obj/
+node_modules/
+src/OpenQuery.Server/wwwroot/app/
+*.user
+.vs/
+.idea/
