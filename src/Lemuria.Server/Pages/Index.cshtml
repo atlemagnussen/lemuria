@@ -1,5 +1,5 @@
 @page "/"
-@inject OpenQuery.Server.Vite.ViteAssets Vite
+@inject Lemuria.Server.Vite.ViteAssets Vite
 @{
     Layout = null;
     var dev = Vite.DevServerUrl;
@@ -9,12 +9,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Open Query</title>
+    <title>Lemuria</title>
     <link rel="icon" type="image/svg+xml" href="/app/favicon.svg" />
     <script>
         // Apply saved theme before first paint to avoid a flash.
         (function () {
-            var t = localStorage.getItem('oq-theme');
+            var t = localStorage.getItem('lm-theme');
             var dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
             document.documentElement.classList.add(dark ? 'wa-dark' : 'wa-light');
         })();
@@ -35,6 +35,6 @@
     }
 </head>
 <body>
-    <oq-app></oq-app>
+    <lm-app></lm-app>
 </body>
 </html>

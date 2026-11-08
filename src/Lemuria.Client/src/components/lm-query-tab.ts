@@ -1,9 +1,9 @@
 import { LitElement, css, html, type PropertyValues } from 'lit';
 import { api, ApiError, type QueryResponse } from '../api.js';
 import { store, StoreController } from '../store.js';
-import type { OqSqlEditor, RunDetail } from './oq-sql-editor.js';
-import './oq-sql-editor.js';
-import './oq-results.js';
+import type { LmSqlEditor, RunDetail } from './lm-sql-editor.js';
+import './lm-sql-editor.js';
+import './lm-results.js';
 
 export interface QueryTabModel {
   id: string;
@@ -15,7 +15,7 @@ export interface QueryTabModel {
 }
 
 /** One query document: toolbar (connection + database + run), editor on top, results below. */
-export class OqQueryTab extends LitElement {
+export class LmQueryTab extends LitElement {
   static properties = {
     model: { attribute: false },
     databases: { state: true },
@@ -81,7 +81,7 @@ export class OqQueryTab extends LitElement {
   `;
 
   private get editor() {
-    return this.renderRoot.querySelector<OqSqlEditor>('oq-sql-editor')!;
+    return this.renderRoot.querySelector<LmSqlEditor>('lm-sql-editor')!;
   }
 
   render() {
@@ -115,8 +115,8 @@ export class OqQueryTab extends LitElement {
         <span class="hint">Ctrl+Enter / F5 to run · Ctrl+Space for suggestions</span>
       </div>
       <wa-split-panel orientation="vertical" position="45">
-        <oq-sql-editor slot="start" .value=${m.sql} @oq-run=${(e: CustomEvent<RunDetail>) => this.run(e.detail)}></oq-sql-editor>
-        <oq-results slot="end" .response=${this.response} .running=${this.running} .failure=${this.failure}></oq-results>
+        <lm-sql-editor slot="start" .value=${m.sql} @lm-run=${(e: CustomEvent<RunDetail>) => this.run(e.detail)}></lm-sql-editor>
+        <lm-results slot="end" .response=${this.response} .running=${this.running} .failure=${this.failure}></lm-results>
       </wa-split-panel>
     `;
   }
@@ -143,7 +143,7 @@ export class OqQueryTab extends LitElement {
 
   private changed() {
     this.model.sql = this.editor.value;
-    this.dispatchEvent(new CustomEvent('oq-tab-change', { bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('lm-tab-change', { bubbles: true, composed: true }));
     this.requestUpdate();
   }
 
@@ -222,10 +222,10 @@ export class OqQueryTab extends LitElement {
   private cancel = () => this.abort?.abort();
 }
 
-customElements.define('oq-query-tab', OqQueryTab);
+customElements.define('lm-query-tab', LmQueryTab);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'oq-query-tab': OqQueryTab;
+    'lm-query-tab': LmQueryTab;
   }
 }

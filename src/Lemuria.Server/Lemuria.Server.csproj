@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <WebClientRoot>..\OpenQuery.Web\</WebClientRoot>
+    <WebClientRoot>..\Lemuria.Client\</WebClientRoot>
   </PropertyGroup>
 
   <!-- `dotnet publish` builds the Lit/Vite client into wwwroot/app so the output is self-contained. -->

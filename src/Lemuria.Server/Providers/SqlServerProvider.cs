@@ -2,9 +2,9 @@ using System.Data.Common;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Data.SqlClient;
-using OpenQuery.Server.Connections;
+using Lemuria.Server.Connections;
 
-namespace OpenQuery.Server.Providers;
+namespace Lemuria.Server.Providers;
 
 public sealed partial class SqlServerProvider : IDbProvider
 {
@@ -19,7 +19,7 @@ public sealed partial class SqlServerProvider : IDbProvider
             DataSource = c.Port is { } port && port != DefaultPort ? $"{c.Host},{port}" : c.Host,
             Encrypt = c.Encrypt ? SqlConnectionEncryptOption.Mandatory : SqlConnectionEncryptOption.Optional,
             TrustServerCertificate = c.TrustServerCertificate,
-            ApplicationName = "OpenQuery",
+            ApplicationName = "Lemuria",
             ConnectTimeout = 15,
         };
         if (!string.IsNullOrWhiteSpace(c.Database)) builder.InitialCatalog = c.Database;

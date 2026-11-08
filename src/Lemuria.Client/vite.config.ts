@@ -15,7 +15,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../OpenQuery.Server/wwwroot/app',
+    outDir: '../Lemuria.Server/wwwroot/app',
     emptyOutDir: true,
     manifest: true,
     target: 'es2022',

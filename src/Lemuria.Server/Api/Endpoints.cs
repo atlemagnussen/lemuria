@@ -1,13 +1,13 @@
 using System.Data.Common;
-using OpenQuery.Server.Connections;
-using OpenQuery.Server.Providers;
-using OpenQuery.Server.Query;
+using Lemuria.Server.Connections;
+using Lemuria.Server.Providers;
+using Lemuria.Server.Query;
 
-namespace OpenQuery.Server.Api;
+namespace Lemuria.Server.Api;
 
 public static class Endpoints
 {
-    public static void MapOpenQueryApi(this IEndpointRouteBuilder app)
+    public static void MapLemuriaApi(this IEndpointRouteBuilder app)
     {
         var api = app.MapGroup("/api");
 

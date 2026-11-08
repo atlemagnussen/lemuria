@@ -19,4 +19,4 @@ import '@awesome.me/webawesome/dist/components/tooltip/tooltip.js';
 import '@awesome.me/webawesome/dist/components/tree/tree.js';
 import '@awesome.me/webawesome/dist/components/tree-item/tree-item.js';
 
-import './components/oq-app.js';
+import './components/lm-app.js';

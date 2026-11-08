@@ -1,9 +1,9 @@
 import { LitElement, css, html, nothing } from 'lit';
 import type { QueryResponse } from '../api.js';
-import './oq-data-grid.js';
+import './lm-data-grid.js';
 
 /** Bottom panel: one tab per result set plus a Messages tab, and a status bar. */
-export class OqResults extends LitElement {
+export class LmResults extends LitElement {
   static properties = {
     response: { attribute: false },
     running: { type: Boolean },
@@ -67,7 +67,7 @@ export class OqResults extends LitElement {
       flex: 1;
       min-height: 0;
     }
-    oq-data-grid {
+    lm-data-grid {
       position: absolute;
       inset: 0;
     }
@@ -145,7 +145,7 @@ export class OqResults extends LitElement {
       </div>
       <div class="body">
         ${set
-          ? html`<oq-data-grid .columns=${set.columns} .rows=${set.rows}></oq-data-grid>`
+          ? html`<lm-data-grid .columns=${set.columns} .rows=${set.rows}></lm-data-grid>`
           : html`<div class="messages">${this.renderMessages(r)}</div>`}
       </div>
       <div class="status">
@@ -178,10 +178,10 @@ function formatElapsed(ms: number) {
   return s < 60 ? `${s.toFixed(2)} s` : `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`;
 }
 
-customElements.define('oq-results', OqResults);
+customElements.define('lm-results', LmResults);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'oq-results': OqResults;
+    'lm-results': LmResults;
   }
 }

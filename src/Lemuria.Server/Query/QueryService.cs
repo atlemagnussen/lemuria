@@ -1,10 +1,10 @@
 using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
-using OpenQuery.Server.Connections;
-using OpenQuery.Server.Providers;
+using Lemuria.Server.Connections;
+using Lemuria.Server.Providers;
 
-namespace OpenQuery.Server.Query;
+namespace Lemuria.Server.Query;
 
 public sealed record QueryRequest(Guid ConnectionId, string? Database, string Sql, int? MaxRows);
 
@@ -52,7 +52,7 @@ public sealed class QueryService(ConnectionStore store, ProviderRegistry provide
 
     public async Task<QueryResponse> ExecuteAsync(QueryRequest request, CancellationToken ct)
     {
-        var maxRows = request.MaxRows ?? config.GetValue("OpenQuery:DefaultMaxRows", 10_000);
+        var maxRows = request.MaxRows ?? config.GetValue("Lemuria:DefaultMaxRows", 10_000);
         var sw = Stopwatch.StartNew();
         var resultSets = new List<ResultSet>();
         var messages = new List<string>();

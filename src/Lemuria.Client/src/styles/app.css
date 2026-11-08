@@ -1,33 +1,33 @@
 /* Global styles + app-level tokens. Custom properties inherit into shadow roots,
    so components use these (and Web Awesome's --wa-* tokens) to follow the theme. */
 :root {
-  --oq-header-height: 44px;
-  --oq-grid-row-height: 26px;
-  --oq-grid-font: var(--wa-font-family-code);
-  --oq-grid-font-size: 12.5px;
+  --lm-header-height: 44px;
+  --lm-grid-row-height: 26px;
+  --lm-grid-font: var(--wa-font-family-code);
+  --lm-grid-font-size: 12.5px;
 }
 
 .wa-light {
-  --oq-syntax-keyword: #0033b3;
-  --oq-syntax-string: #067d17;
-  --oq-syntax-number: #1750eb;
-  --oq-syntax-comment: #8c8c8c;
-  --oq-syntax-operator: #871094;
-  --oq-syntax-type: #00627a;
-  --oq-null: #a0a0a0;
-  --oq-selection: color-mix(in oklab, var(--wa-color-brand-fill-loud) 22%, transparent);
+  --lm-syntax-keyword: #0033b3;
+  --lm-syntax-string: #067d17;
+  --lm-syntax-number: #1750eb;
+  --lm-syntax-comment: #8c8c8c;
+  --lm-syntax-operator: #871094;
+  --lm-syntax-type: #00627a;
+  --lm-null: #a0a0a0;
+  --lm-selection: color-mix(in oklab, var(--wa-color-brand-fill-loud) 22%, transparent);
   color-scheme: light;
 }
 
 .wa-dark {
-  --oq-syntax-keyword: #cf8e6d;
-  --oq-syntax-string: #6aab73;
-  --oq-syntax-number: #2aacb8;
-  --oq-syntax-comment: #7a7e85;
-  --oq-syntax-operator: #c77dbb;
-  --oq-syntax-type: #56a8f5;
-  --oq-null: #6f737a;
-  --oq-selection: color-mix(in oklab, var(--wa-color-brand-fill-loud) 35%, transparent);
+  --lm-syntax-keyword: #cf8e6d;
+  --lm-syntax-string: #6aab73;
+  --lm-syntax-number: #2aacb8;
+  --lm-syntax-comment: #7a7e85;
+  --lm-syntax-operator: #c77dbb;
+  --lm-syntax-type: #56a8f5;
+  --lm-null: #6f737a;
+  --lm-selection: color-mix(in oklab, var(--wa-color-brand-fill-loud) 35%, transparent);
   color-scheme: dark;
 }
 
@@ -44,6 +44,6 @@ body {
   font-family: var(--wa-font-family-body);
 }
 
-oq-app {
+lm-app {
   height: 100%;
 }

@@ -65,11 +65,11 @@ export function setTheme(theme: Theme) {
   const root = document.documentElement;
   root.classList.toggle('wa-dark', theme === 'dark');
   root.classList.toggle('wa-light', theme === 'light');
-  localStorage.setItem('oq-theme', theme);
-  window.dispatchEvent(new CustomEvent('oq-theme-change', { detail: theme }));
+  localStorage.setItem('lm-theme', theme);
+  window.dispatchEvent(new CustomEvent('lm-theme-change', { detail: theme }));
 }
 
-// ---- App events (bubble + composed so they cross shadow roots up to <oq-app>) ----
+// ---- App events (bubble + composed so they cross shadow roots up to <lm-app>) ----
 
 export interface OpenQueryDetail {
   connectionId: string;
@@ -84,15 +84,15 @@ export interface EditConnectionDetail {
 
 declare global {
   interface HTMLElementEventMap {
-    'oq-open-query': CustomEvent<OpenQueryDetail>;
-    'oq-edit-connection': CustomEvent<EditConnectionDetail>;
+    'lm-open-query': CustomEvent<OpenQueryDetail>;
+    'lm-edit-connection': CustomEvent<EditConnectionDetail>;
   }
   interface WindowEventMap {
-    'oq-theme-change': CustomEvent<Theme>;
+    'lm-theme-change': CustomEvent<Theme>;
   }
 }
 
-export function emit<K extends 'oq-open-query' | 'oq-edit-connection'>(
+export function emit<K extends 'lm-open-query' | 'lm-edit-connection'>(
   from: EventTarget,
   type: K,
   detail: HTMLElementEventMap[K]['detail'],

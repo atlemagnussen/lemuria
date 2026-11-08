@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.DataProtection;
 
-namespace OpenQuery.Server.Connections;
+namespace Lemuria.Server.Connections;
 
 /// <summary>Persists connection profiles as JSON in the app data directory.</summary>
 public sealed class ConnectionStore
@@ -16,7 +16,7 @@ public sealed class ConnectionStore
     public ConnectionStore(AppPaths paths, IDataProtectionProvider dataProtection)
     {
         _file = Path.Combine(paths.DataDirectory, "connections.json");
-        _protector = dataProtection.CreateProtector("OpenQuery.Connections.Password.v1");
+        _protector = dataProtection.CreateProtector("Lemuria.Connections.Password.v1");
     }
 
     public async Task<IReadOnlyList<ConnectionProfile>> ListAsync(CancellationToken ct = default)
@@ -117,9 +117,9 @@ public sealed class AppPaths
 
     public AppPaths(IConfiguration config)
     {
-        var configured = config["OpenQuery:DataDirectory"];
+        var configured = config["Lemuria:DataDirectory"];
         DataDirectory = string.IsNullOrWhiteSpace(configured)
-            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OpenQuery")
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Lemuria")
             : configured;
         Directory.CreateDirectory(DataDirectory);
     }

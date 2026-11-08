@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace OpenQuery.Server.Vite;
+namespace Lemuria.Server.Vite;
 
 /// <summary>
 /// Resolves the frontend entry for the Razor host page.
@@ -26,7 +26,7 @@ public sealed class ViteAssets(IWebHostEnvironment env, IConfiguration config)
 
         if (!File.Exists(file))
             throw new FileNotFoundException(
-                "Frontend not built. Run `npm run build` in src/OpenQuery.Web (or set Vite:DevServerUrl and run `npm run dev`).", file);
+                "Frontend not built. Run `npm run build` in src/Lemuria.Client (or set Vite:DevServerUrl and run `npm run dev`).", file);
 
         using var doc = JsonDocument.Parse(File.ReadAllText(file));
         var entry = doc.RootElement.GetProperty(Entry);

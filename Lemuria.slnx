@@ -1,5 +1,5 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/OpenQuery.Server/OpenQuery.Server.csproj" />
+    <Project Path="src/Lemuria.Server/Lemuria.Server.csproj" />
   </Folder>
 </Solution>

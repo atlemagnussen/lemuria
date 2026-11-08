@@ -1,4 +1,4 @@
-namespace OpenQuery.Server.Connections;
+namespace Lemuria.Server.Connections;
 
 /// <summary>A saved database connection. Password is stored encrypted (Data Protection).</summary>
 public sealed class ConnectionProfile

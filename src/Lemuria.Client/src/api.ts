@@ -1,4 +1,4 @@
-// Typed client for the .NET API. Keep in sync with OpenQuery.Server/Api/Endpoints.cs.
+// Typed client for the .NET API. Keep in sync with Lemuria.Server/Api/Endpoints.cs.
 
 export interface Connection {
   id: string;

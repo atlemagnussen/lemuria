@@ -26,7 +26,7 @@ const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'bas
  *   Ctrl+Shift+C copies with headers, click header to sort, drag header edge to resize,
  *   double-click header edge to auto-fit.
  */
-export class OqDataGrid extends LitElement {
+export class LmDataGrid extends LitElement {
   static properties = {
     columns: { attribute: false },
     rows: { attribute: false },
@@ -62,11 +62,11 @@ export class OqDataGrid extends LitElement {
       display: block;
       position: relative;
       overflow: hidden;
-      font-family: var(--oq-grid-font);
-      font-size: var(--oq-grid-font-size);
+      font-family: var(--lm-grid-font);
+      font-size: var(--lm-grid-font-size);
       color: var(--wa-color-text-normal);
       background: var(--wa-color-surface-default);
-      --row-h: var(--oq-grid-row-height, 26px);
+      --row-h: var(--lm-grid-row-height, 26px);
       --border: var(--wa-color-surface-border);
     }
     .viewport {
@@ -157,7 +157,7 @@ export class OqDataGrid extends LitElement {
       text-align: right;
     }
     .cell.null {
-      color: var(--oq-null);
+      color: var(--lm-null);
       font-style: italic;
     }
     .cell.gutter,
@@ -170,7 +170,7 @@ export class OqDataGrid extends LitElement {
       background: var(--wa-color-surface-raised) !important;
     }
     .row .cell.sel {
-      background: var(--oq-selection);
+      background: var(--lm-selection);
     }
     .row .cell.focus {
       outline: 2px solid var(--wa-color-brand-fill-loud);
@@ -553,10 +553,10 @@ export class OqDataGrid extends LitElement {
   }
 }
 
-customElements.define('oq-data-grid', OqDataGrid);
+customElements.define('lm-data-grid', LmDataGrid);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'oq-data-grid': OqDataGrid;
+    'lm-data-grid': LmDataGrid;
   }
 }

@@ -1,16 +1,16 @@
 import { LitElement, css, html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { currentTheme, setTheme, store, StoreController, type EditConnectionDetail, type OpenQueryDetail } from '../store.js';
-import type { OqConnectionDialog } from './oq-connection-dialog.js';
-import type { OqQueryTab, QueryTabModel } from './oq-query-tab.js';
-import './oq-connection-tree.js';
-import './oq-connection-dialog.js';
-import './oq-query-tab.js';
+import type { LmConnectionDialog } from './lm-connection-dialog.js';
+import type { LmQueryTab, QueryTabModel } from './lm-query-tab.js';
+import './lm-connection-tree.js';
+import './lm-connection-dialog.js';
+import './lm-query-tab.js';
 
-const TABS_KEY = 'oq-tabs';
+const TABS_KEY = 'lm-tabs';
 
 /** App shell: header, left object explorer, right tabbed query area. */
-export class OqApp extends LitElement {
+export class LmApp extends LitElement {
   static properties = {
     tabs: { state: true },
     activeId: { state: true },
@@ -42,7 +42,7 @@ export class OqApp extends LitElement {
       display: flex;
       align-items: center;
       gap: var(--wa-space-s);
-      height: var(--oq-header-height);
+      height: var(--lm-header-height);
       padding: 0 var(--wa-space-s) 0 var(--wa-space-m);
       border-bottom: 1px solid var(--wa-color-surface-border);
       background: var(--wa-color-surface-raised);
@@ -134,11 +134,11 @@ export class OqApp extends LitElement {
       flex: 1;
       min-height: 0;
     }
-    oq-query-tab {
+    lm-query-tab {
       position: absolute;
       inset: 0;
     }
-    oq-query-tab:not([active]) {
+    lm-query-tab:not([active]) {
       display: none;
     }
     .welcome {
@@ -154,9 +154,9 @@ export class OqApp extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     store.loadConnections().catch((e) => (this.loadError = String(e?.message ?? e)));
-    this.addEventListener('oq-open-query', this.onOpenQuery);
-    this.addEventListener('oq-edit-connection', this.onEditConnection);
-    this.addEventListener('oq-tab-change', this.persist);
+    this.addEventListener('lm-open-query', this.onOpenQuery);
+    this.addEventListener('lm-edit-connection', this.onEditConnection);
+    this.addEventListener('lm-tab-change', this.persist);
     window.addEventListener('keydown', this.onKey);
     window.addEventListener('beforeunload', this.persistNow);
   }
@@ -171,7 +171,7 @@ export class OqApp extends LitElement {
     const dark = currentTheme() === 'dark';
     return html`
       <header>
-        <div class="brand"><wa-icon name="database"></wa-icon> Open Query</div>
+        <div class="brand"><wa-icon name="database"></wa-icon> Lemuria</div>
         <span class="spacer"></span>
         <wa-button
           size="small"
@@ -187,7 +187,7 @@ export class OqApp extends LitElement {
       </header>
       ${this.loadError ? html`<wa-callout variant="danger">Could not reach the server: ${this.loadError}</wa-callout>` : nothing}
       <wa-split-panel class="main" position-in-pixels="280" primary="start">
-        <oq-connection-tree slot="start"></oq-connection-tree>
+        <lm-connection-tree slot="start"></lm-connection-tree>
         <div class="workspace" slot="end">
           <div class="tabstrip">
             ${repeat(
@@ -206,13 +206,13 @@ export class OqApp extends LitElement {
             ${repeat(
               this.tabs,
               (t) => t.id,
-              (t) => html`<oq-query-tab .model=${t} ?active=${t.id === this.activeId}></oq-query-tab>`,
+              (t) => html`<lm-query-tab .model=${t} ?active=${t.id === this.activeId}></lm-query-tab>`,
             )}
             ${this.tabs.length === 0 ? this.renderWelcome() : nothing}
           </div>
         </div>
       </wa-split-panel>
-      <oq-connection-dialog></oq-connection-dialog>
+      <lm-connection-dialog></lm-connection-dialog>
     `;
   }
 
@@ -231,7 +231,7 @@ export class OqApp extends LitElement {
   }
 
   private get dialog() {
-    return this.renderRoot.querySelector<OqConnectionDialog>('oq-connection-dialog')!;
+    return this.renderRoot.querySelector<LmConnectionDialog>('lm-connection-dialog')!;
   }
 
   private tabTitle(t: QueryTabModel) {
@@ -258,7 +258,7 @@ export class OqApp extends LitElement {
   private async activate(id: string) {
     this.activeId = id;
     await this.updateComplete;
-    this.renderRoot.querySelector<OqQueryTab>('oq-query-tab[active]')?.focusEditor();
+    this.renderRoot.querySelector<LmQueryTab>('lm-query-tab[active]')?.focusEditor();
   }
 
   private close(id: string) {
@@ -289,8 +289,8 @@ export class OqApp extends LitElement {
 
   private persistNow = () => {
     // Pull latest editor text from each tab before saving.
-    this.renderRoot.querySelectorAll<OqQueryTab>('oq-query-tab').forEach((el) => {
-      const editor = el.shadowRoot?.querySelector('oq-sql-editor');
+    this.renderRoot.querySelectorAll<LmQueryTab>('lm-query-tab').forEach((el) => {
+      const editor = el.shadowRoot?.querySelector('lm-sql-editor');
       if (editor) el.model.sql = editor.value;
     });
     const data = this.tabs.map(({ id, connectionId, database, sql }) => ({ id, connectionId, database, sql }));
@@ -307,10 +307,10 @@ function restoreTabs(): { tabs: QueryTabModel[]; activeId: string | null } {
   }
 }
 
-customElements.define('oq-app', OqApp);
+customElements.define('lm-app', LmApp);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'oq-app': OqApp;
+    'lm-app': LmApp;
   }
 }

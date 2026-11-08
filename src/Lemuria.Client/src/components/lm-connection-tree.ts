@@ -10,7 +10,7 @@ const quote = (name: string) => `[${name.replace(/]/g, ']]')}]`;
  * Left-hand object explorer: connections → databases → tables/views → columns.
  * Everything below a connection is loaded lazily on expand.
  */
-export class OqConnectionTree extends LitElement {
+export class LmConnectionTree extends LitElement {
   static properties = {
     filter: { state: true },
   };
@@ -119,7 +119,7 @@ export class OqConnectionTree extends LitElement {
     return html`
       <div class="head">
         <span>Connections</span>
-        <wa-button size="small" appearance="plain" title="New connection" @click=${() => emit(this, 'oq-edit-connection', { connectionId: null })}>
+        <wa-button size="small" appearance="plain" title="New connection" @click=${() => emit(this, 'lm-edit-connection', { connectionId: null })}>
           <wa-icon name="plus" label="New connection"></wa-icon>
         </wa-button>
       </div>
@@ -132,7 +132,7 @@ export class OqConnectionTree extends LitElement {
         ${connections.length === 0
           ? html`<div class="empty">
               No connections yet.<br /><br />
-              <wa-button size="small" variant="brand" @click=${() => emit(this, 'oq-edit-connection', { connectionId: null })}>Add connection</wa-button>
+              <wa-button size="small" variant="brand" @click=${() => emit(this, 'lm-edit-connection', { connectionId: null })}>Add connection</wa-button>
             </div>`
           : html`<wa-tree selection="leaf">${connections.map((c) => this.renderConnection(c))}</wa-tree>`}
       </div>
@@ -153,7 +153,7 @@ export class OqConnectionTree extends LitElement {
             <wa-button size="small" appearance="plain" title="Refresh" @click=${(e: Event) => this.refresh(e, c.id)}>
               <wa-icon name="arrows-rotate" label="Refresh"></wa-icon>
             </wa-button>
-            <wa-button size="small" appearance="plain" title="Edit" @click=${(e: Event) => this.stop(e, () => emit(this, 'oq-edit-connection', { connectionId: c.id }))}>
+            <wa-button size="small" appearance="plain" title="Edit" @click=${(e: Event) => this.stop(e, () => emit(this, 'lm-edit-connection', { connectionId: c.id }))}>
               <wa-icon name="pen" label="Edit"></wa-icon>
             </wa-button>
             <wa-button size="small" appearance="plain" title="Delete" @click=${(e: Event) => this.stop(e, () => this.deleteConnection(c))}>
@@ -288,12 +288,12 @@ export class OqConnectionTree extends LitElement {
 
   private openQuery(e: Event, connectionId: string, database: string | null) {
     e.stopPropagation();
-    emit(this, 'oq-open-query', { connectionId, database });
+    emit(this, 'lm-open-query', { connectionId, database });
   }
 
   private selectTop(e: Event, connectionId: string, database: string, fq: string) {
     e.stopPropagation();
-    emit(this, 'oq-open-query', { connectionId, database, sql: `SELECT TOP (1000) *\nFROM ${fq};\n`, run: true });
+    emit(this, 'lm-open-query', { connectionId, database, sql: `SELECT TOP (1000) *\nFROM ${fq};\n`, run: true });
   }
 
   private async deleteConnection(c: Connection) {
@@ -304,10 +304,10 @@ export class OqConnectionTree extends LitElement {
   }
 }
 
-customElements.define('oq-connection-tree', OqConnectionTree);
+customElements.define('lm-connection-tree', LmConnectionTree);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'oq-connection-tree': OqConnectionTree;
+    'lm-connection-tree': LmConnectionTree;
   }
 }

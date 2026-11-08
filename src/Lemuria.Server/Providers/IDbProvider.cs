@@ -1,7 +1,7 @@
 using System.Data.Common;
-using OpenQuery.Server.Connections;
+using Lemuria.Server.Connections;
 
-namespace OpenQuery.Server.Providers;
+namespace Lemuria.Server.Providers;
 
 /// <summary>
 /// Everything engine-specific lives behind this interface. Query execution itself is generic

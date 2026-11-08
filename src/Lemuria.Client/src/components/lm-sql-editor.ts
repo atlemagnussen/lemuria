@@ -30,13 +30,13 @@ const errorLineField = StateField.define<DecorationSet>({
 
 /** Syntax colors come from CSS variables (see styles/app.css), so one style serves both themes. */
 const highlight = HighlightStyle.define([
-  { tag: [t.keyword, t.operatorKeyword, t.modifier], color: 'var(--oq-syntax-keyword)', fontWeight: '600' },
-  { tag: [t.string, t.special(t.string)], color: 'var(--oq-syntax-string)' },
-  { tag: [t.number, t.bool, t.null], color: 'var(--oq-syntax-number)' },
-  { tag: [t.comment, t.lineComment, t.blockComment], color: 'var(--oq-syntax-comment)', fontStyle: 'italic' },
-  { tag: [t.operator, t.punctuation], color: 'var(--oq-syntax-operator)' },
-  { tag: [t.typeName, t.standard(t.name)], color: 'var(--oq-syntax-type)' },
-  { tag: t.special(t.name), color: 'var(--oq-syntax-type)' },
+  { tag: [t.keyword, t.operatorKeyword, t.modifier], color: 'var(--lm-syntax-keyword)', fontWeight: '600' },
+  { tag: [t.string, t.special(t.string)], color: 'var(--lm-syntax-string)' },
+  { tag: [t.number, t.bool, t.null], color: 'var(--lm-syntax-number)' },
+  { tag: [t.comment, t.lineComment, t.blockComment], color: 'var(--lm-syntax-comment)', fontStyle: 'italic' },
+  { tag: [t.operator, t.punctuation], color: 'var(--lm-syntax-operator)' },
+  { tag: [t.typeName, t.standard(t.name)], color: 'var(--lm-syntax-type)' },
+  { tag: t.special(t.name), color: 'var(--lm-syntax-type)' },
 ]);
 
 const baseTheme = (dark: boolean) =>
@@ -59,7 +59,7 @@ const baseTheme = (dark: boolean) =>
       '.cm-activeLine': { backgroundColor: 'color-mix(in oklab, var(--wa-color-text-normal) 4%, transparent)' },
       '.cm-activeLineGutter': { backgroundColor: 'transparent', color: 'var(--wa-color-text-normal)' },
       '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, ::selection':
-        { backgroundColor: 'var(--oq-selection) !important' },
+        { backgroundColor: 'var(--lm-selection) !important' },
       '.cm-tooltip': {
         backgroundColor: 'var(--wa-color-surface-raised)',
         color: 'var(--wa-color-text-normal)',
@@ -108,9 +108,9 @@ export interface RunDetail {
 
 /**
  * SQL editor built on CodeMirror 6 (lightweight, shadow-DOM friendly, first-class SQL autocomplete).
- * Emits `oq-run` on Ctrl/Cmd+Enter or F5 with the selection (or whole document).
+ * Emits `lm-run` on Ctrl/Cmd+Enter or F5 with the selection (or whole document).
  */
-export class OqSqlEditor extends LitElement {
+export class LmSqlEditor extends LitElement {
   static properties = {
     value: {},
   };
@@ -144,7 +144,7 @@ export class OqSqlEditor extends LitElement {
 
   firstUpdated() {
     const run = () => {
-      this.dispatchEvent(new CustomEvent<RunDetail>('oq-run', { detail: this.getRunTarget(), bubbles: true, composed: true }));
+      this.dispatchEvent(new CustomEvent<RunDetail>('lm-run', { detail: this.getRunTarget(), bubbles: true, composed: true }));
       return true;
     };
 
@@ -172,12 +172,12 @@ export class OqSqlEditor extends LitElement {
         ],
       }),
     });
-    window.addEventListener('oq-theme-change', this.onTheme);
+    window.addEventListener('lm-theme-change', this.onTheme);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    window.removeEventListener('oq-theme-change', this.onTheme);
+    window.removeEventListener('lm-theme-change', this.onTheme);
   }
 
   /** Enable schema-aware completion (tables, views, columns, aliases) for the given provider. */
@@ -227,13 +227,13 @@ export class OqSqlEditor extends LitElement {
   }
 }
 
-customElements.define('oq-sql-editor', OqSqlEditor);
+customElements.define('lm-sql-editor', LmSqlEditor);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'oq-sql-editor': OqSqlEditor;
+    'lm-sql-editor': LmSqlEditor;
   }
   interface HTMLElementEventMap {
-    'oq-run': CustomEvent<RunDetail>;
+    'lm-run': CustomEvent<RunDetail>;
   }
 }

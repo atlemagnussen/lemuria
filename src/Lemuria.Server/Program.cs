@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.DataProtection;
-using OpenQuery.Server.Api;
-using OpenQuery.Server.Connections;
-using OpenQuery.Server.Providers;
-using OpenQuery.Server.Query;
-using OpenQuery.Server.Vite;
+using Lemuria.Server.Api;
+using Lemuria.Server.Connections;
+using Lemuria.Server.Providers;
+using Lemuria.Server.Query;
+using Lemuria.Server.Vite;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var paths = new AppPaths(builder.Configuration);
 builder.Services.AddSingleton(paths);
 builder.Services.AddDataProtection()
-    .SetApplicationName("OpenQuery")
+    .SetApplicationName("Lemuria")
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(paths.DataDirectory, "keys")));
 
 builder.Services.AddSingleton<IDbProvider, SqlServerProvider>();
@@ -24,7 +24,7 @@ builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.PropertyNamin
 var app = builder.Build();
 
 app.UseStaticFiles();
-app.MapOpenQueryApi();
+app.MapLemuriaApi();
 app.MapRazorPages();
 
 app.Run();

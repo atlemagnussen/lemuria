@@ -19,7 +19,7 @@ const blank = (): ConnectionInput => ({
 });
 
 /** Create / edit a connection. Open with `edit(connection | null)`. */
-export class OqConnectionDialog extends LitElement {
+export class LmConnectionDialog extends LitElement {
   static properties = {
     open: { state: true },
     form: { state: true },
@@ -179,7 +179,7 @@ export class OqConnectionDialog extends LitElement {
       const saved = this.existing ? await api.updateConnection(this.existing.id, input) : await api.createConnection(input);
       await store.loadConnections();
       store.invalidateSchema(saved.id);
-      this.dispatchEvent(new CustomEvent('oq-connection-saved', { detail: saved, bubbles: true, composed: true }));
+      this.dispatchEvent(new CustomEvent('lm-connection-saved', { detail: saved, bubbles: true, composed: true }));
       this.open = false;
     } catch (err) {
       this.error = errorText(err);
@@ -205,10 +205,10 @@ function truncate(s: string, n: number) {
   return s.length > n ? s.slice(0, n) + '…' : s;
 }
 
-customElements.define('oq-connection-dialog', OqConnectionDialog);
+customElements.define('lm-connection-dialog', LmConnectionDialog);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'oq-connection-dialog': OqConnectionDialog;
+    'lm-connection-dialog': LmConnectionDialog;
   }
 }
