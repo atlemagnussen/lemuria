@@ -53,10 +53,10 @@ public static class Endpoints
         });
 
         connections.MapGet("/{id:guid}/databases", async (Guid id, QueryService query, CancellationToken ct) =>
-            await WithConnection(query, id, null, ct, (p, c) => p.GetDatabasesAsync(c, ct)));
+            await WithConnection(() => query.OpenForCatalogAsync(id, ct), (p, c) => p.GetDatabasesAsync(c, ct)));
 
         connections.MapGet("/{id:guid}/schema", async (Guid id, string? database, QueryService query, CancellationToken ct) =>
-            await WithConnection(query, id, database, ct, (p, c) => p.GetSchemaAsync(c, ct)));
+            await WithConnection(() => query.OpenAsync(id, database, ct), (p, c) => p.GetSchemaAsync(c, ct)));
 
         api.MapPost("/query", async (QueryRequest request, QueryService query, CancellationToken ct) =>
         {
@@ -78,12 +78,12 @@ public static class Endpoints
     }
 
     private static async Task<IResult> WithConnection<T>(
-        QueryService query, Guid id, string? database, CancellationToken ct,
+        Func<Task<(IDbProvider Provider, DbConnection Connection)>> open,
         Func<IDbProvider, DbConnection, Task<T>> action)
     {
         try
         {
-            var (provider, conn) = await query.OpenAsync(id, database, ct);
+            var (provider, conn) = await open();
             await using var _ = conn;
             return Results.Ok(await action(provider, conn));
         }

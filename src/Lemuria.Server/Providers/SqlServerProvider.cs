@@ -37,10 +37,24 @@ public sealed partial class SqlServerProvider : IDbProvider
         return new SqlConnection(builder.ConnectionString);
     }
 
+    public string? CatalogDatabase => "master";
+
     public async Task<IReadOnlyList<string>> GetDatabasesAsync(DbConnection open, CancellationToken ct)
     {
         await using var cmd = open.CreateCommand();
-        cmd.CommandText = "SELECT name FROM sys.databases WHERE HAS_DBACCESS(name) = 1 ORDER BY CASE WHEN database_id <= 4 THEN 1 ELSE 0 END, name";
+        // Azure SQL Database: no cross-database access, so HAS_DBACCESS is 0 for everything but the current
+        // database, and sys.databases lists every database only when connected to master. Outside master
+        // (login can't reach it, e.g. a contained user) the current database is all we can offer.
+        cmd.CommandText = """
+            IF CAST(SERVERPROPERTY('EngineEdition') AS int) = 5
+                SELECT name FROM sys.databases
+                WHERE DB_NAME() = 'master' OR name = DB_NAME()
+                ORDER BY CASE WHEN name = 'master' THEN 1 ELSE 0 END, name
+            ELSE
+                SELECT name FROM sys.databases
+                WHERE HAS_DBACCESS(name) = 1
+                ORDER BY CASE WHEN database_id <= 4 THEN 1 ELSE 0 END, name
+            """;
         var result = new List<string>();
         await using var reader = await cmd.ExecuteReaderAsync(ct);
         while (await reader.ReadAsync(ct)) result.Add(reader.GetString(0));

@@ -51,6 +51,24 @@ public sealed class QueryService(ConnectionStore store, ProviderRegistry provide
         return await OpenAsync(store.Resolve(profile, string.IsNullOrWhiteSpace(database) ? null : database), ct);
     }
 
+    /// <summary>
+    /// Open a connection suited to listing the server's databases: the provider's catalog database
+    /// (e.g. master) when the login can reach it, otherwise the profile's own database.
+    /// </summary>
+    public async Task<(IDbProvider Provider, DbConnection Connection)> OpenForCatalogAsync(
+        Guid connectionId, CancellationToken ct)
+    {
+        var profile = await store.GetAsync(connectionId, ct)
+                      ?? throw new KeyNotFoundException($"Connection {connectionId} not found.");
+        var catalog = providers.Get(profile.Provider).CatalogDatabase;
+        if (catalog is not null && !string.Equals(catalog, profile.Database, StringComparison.OrdinalIgnoreCase))
+        {
+            try { return await OpenAsync(store.Resolve(profile, catalog), ct); }
+            catch (DbException) { /* no access to the catalog database: fall back to the profile's */ }
+        }
+        return await OpenAsync(store.Resolve(profile), ct);
+    }
+
     public async Task<QueryResponse> ExecuteAsync(QueryRequest request, CancellationToken ct)
     {
         var maxRows = request.MaxRows ?? config.GetValue("Lemuria:DefaultMaxRows", 10_000);

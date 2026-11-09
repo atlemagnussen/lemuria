@@ -4,16 +4,46 @@ import { Decoration, type DecorationSet, EditorView, keymap } from '@codemirror/
 import { Compartment, EditorSelection, EditorState, Prec, StateEffect, StateField } from '@codemirror/state';
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { MSSQL, PostgreSQL, sql, type SQLDialect, type SQLNamespace } from '@codemirror/lang-sql';
-import type { Completion } from '@codemirror/autocomplete';
+import type { Completion, CompletionSource } from '@codemirror/autocomplete';
 import { indentWithTab } from '@codemirror/commands';
 import { tags as t } from '@lezer/highlight';
 import type { SchemaInfo } from '../api.js';
 import { currentTheme } from '../store.js';
+import { completeColumns, type ColumnOptions } from '../sql-columns.js';
 
-const dialects: Record<string, { dialect: SQLDialect; defaultSchema: string }> = {
-  sqlserver: { dialect: MSSQL, defaultSchema: 'dbo' },
-  postgres: { dialect: PostgreSQL, defaultSchema: 'public' },
+const dialects: Record<string, { dialect: SQLDialect; defaultSchema: string; quoting: ColumnOptions['quoting'] }> = {
+  sqlserver: { dialect: MSSQL, defaultSchema: 'dbo', quoting: 'brackets' },
+  postgres: { dialect: PostgreSQL, defaultSchema: 'public', quoting: 'double' },
 };
+
+/**
+ * Unqualified column names from the tables in the current statement (lang-sql only completes
+ * `alias.column`). Runs alongside lang-sql's source; see sql-columns.ts for the rules.
+ */
+function columnSource(info: SchemaInfo, d: (typeof dialects)[string]): CompletionSource {
+  return (ctx) => {
+    const r = completeColumns(ctx.state.doc.toString(), ctx.pos, info, {
+      defaultSchema: d.defaultSchema,
+      quoting: d.quoting,
+      explicit: ctx.explicit,
+    });
+    if (!r || r.options.length === 0) return null;
+    return {
+      from: r.from,
+      options: r.options.map(
+        (o): Completion => ({
+          label: o.label,
+          displayLabel: o.insert,
+          apply: o.insert,
+          detail: o.detail,
+          type: 'property',
+          boost: 20, // rank columns above keywords and table names where a column fits
+        }),
+      ),
+      validFor: /^[\p{L}\p{N}_$#@]*$/u,
+    };
+  };
+}
 
 const errorLineDeco = Decoration.line({ class: 'cm-errorLine' });
 const setErrorLine = StateEffect.define<number | null>();
@@ -183,14 +213,15 @@ export class LmSqlEditor extends LitElement {
   /** Enable schema-aware completion (tables, views, columns, aliases) for the given provider. */
   setSchema(provider: string, info: SchemaInfo | null) {
     const d = dialects[provider] ?? dialects.sqlserver;
+    const lang = sql({
+      dialect: d.dialect,
+      upperCaseKeywords: true,
+      schema: info ? toNamespace(info) : undefined,
+      defaultSchema: d.defaultSchema,
+    });
     this.view?.dispatch({
       effects: this.language.reconfigure(
-        sql({
-          dialect: d.dialect,
-          upperCaseKeywords: true,
-          schema: info ? toNamespace(info) : undefined,
-          defaultSchema: d.defaultSchema,
-        }),
+        info ? [lang, lang.language.data.of({ autocomplete: columnSource(info, d) })] : lang,
       ),
     });
   }

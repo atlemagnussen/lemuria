@@ -16,6 +16,12 @@ public interface IDbProvider
 
     DbConnection CreateConnection(ResolvedConnection connection);
 
+    /// <summary>
+    /// Database to connect to when listing databases (SQL Server: "master", which on Azure SQL is the only
+    /// place sys.databases shows them all). Null = the profile's database is fine.
+    /// </summary>
+    string? CatalogDatabase => null;
+
     Task<IReadOnlyList<string>> GetDatabasesAsync(DbConnection open, CancellationToken ct);
 
     Task<SchemaInfo> GetSchemaAsync(DbConnection open, CancellationToken ct);
