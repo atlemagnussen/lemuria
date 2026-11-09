@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/out/
+src/Lemuria.Server/wwwroot/app/
+.git/
+.vs/
+.idea/
+*.user

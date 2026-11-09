@@ -44,6 +44,15 @@ cd src/Lemuria.Server && dotnet publish -c Release -o out
 
 The publish step runs `npm run build`, which writes the client to `wwwroot/app`. The Razor page reads `wwwroot/app/.vite/manifest.json` to find the hashed bundle. You can also run `npm run build` by hand and then `dotnet run` with `ASPNETCORE_ENVIRONMENT=Production`.
 
+### Container
+
+```bash
+podman build -t lemuria -f Containerfile .
+podman run -d --name lemuria -p 8080:8080 -v lemuria-data:/data lemuria
+```
+
+Browse **http://localhost:8080**. The `/data` volume holds connection profiles and the keys that encrypt saved passwords. Keep it between runs. To reach a database running on the host, use `host.containers.internal` as the host name.
+
 ### Test database
 
 ```bash

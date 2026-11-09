@@ -22,10 +22,11 @@
     <WebClientRoot>..\Lemuria.Client\</WebClientRoot>
   </PropertyGroup>
 
-  <!-- `dotnet publish` builds the Lit/Vite client into wwwroot/app so the output is self-contained. -->
+  <!-- `dotnet publish` builds the Lit/Vite client into wwwroot/app so the output is self-contained.
+       Pass -p:SkipWebClientBuild=true when wwwroot/app was already built (e.g. by the Containerfile node stage). -->
   <Target Name="BuildWebClient" BeforeTargets="ComputeFilesToPublish">
-    <Exec WorkingDirectory="$(WebClientRoot)" Command="npm ci" Condition="!Exists('$(WebClientRoot)node_modules')" />
-    <Exec WorkingDirectory="$(WebClientRoot)" Command="npm run build" />
+    <Exec WorkingDirectory="$(WebClientRoot)" Command="npm ci" Condition="'$(SkipWebClientBuild)' != 'true' And !Exists('$(WebClientRoot)node_modules')" />
+    <Exec WorkingDirectory="$(WebClientRoot)" Command="npm run build" Condition="'$(SkipWebClientBuild)' != 'true'" />
     <ItemGroup>
       <ClientDist Include="wwwroot\app\**" />
       <ResolvedFileToPublish Include="@(ClientDist->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">

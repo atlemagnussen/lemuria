@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    # Map the host user to the app's UID 1654 so it can write the hostPath volume
+    # and the files stay owned by you on the host.
+    io.podman.annotations.userns: keep-id:uid=1654,gid=1654
+  creationTimestamp: "2026-11-09T00:00:00Z"
+  labels:
+    app: LemuriaPod
+  name: LemuriaPod
+spec:
+  containers:
+    - image: localhost/lemuria:latest
+      name: app
+      securityContext: {}
+      ports:
+        - containerPort: 8080
+          hostPort: 8003
+      volumeMounts:
+        - name: lemuria-data
+          mountPath: /data
+  volumes:
+    - name: lemuria-data
+      hostPath:
+        path: /data/mounts/lemuria
+        type: Directory
